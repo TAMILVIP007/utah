@@ -47,7 +47,7 @@ async def get_similar_note(chat_id, note_name):
     async for note in db.notes.find({'chat_id': chat_id}):
         all_notes.extend(note['names'])
 
-    if len(all_notes) > 0:
+    if all_notes:
         check = difflib.get_close_matches(note_name, all_notes)
         if len(check) > 0:
             return check[0]
@@ -244,18 +244,19 @@ async def get_note_hashtag(message, chat, regexp=None, **kwargs):
 @get_strings_dec('notes')
 @clean_notes
 async def get_notes_list_cmd(message, chat, strings):
-    if await db.privatenotes.find_one({'chat_id': chat['chat_id']}) \
-            and message.chat.id == chat['chat_id']:  # Workaround to avoid sending PN to connected PM
-        text = strings['notes_in_private']
-        if not (keyword := message.get_args()):
-            keyword = None
-        button = InlineKeyboardMarkup().add(InlineKeyboardButton(
-            text='Click here',
-            url=await get_start_link(f"notes_{chat['chat_id']}_{keyword}")
-        ))
-        return await message.reply(text, reply_markup=button, disable_web_page_preview=True)
-    else:
+    if (
+        not await db.privatenotes.find_one({'chat_id': chat['chat_id']})
+        or message.chat.id != chat['chat_id']
+    ):
         return await get_notes_list(message, chat=chat)
+    text = strings['notes_in_private']
+    if not (keyword := message.get_args()):
+        keyword = None
+    button = InlineKeyboardMarkup().add(InlineKeyboardButton(
+        text='Click here',
+        url=await get_start_link(f"notes_{chat['chat_id']}_{keyword}")
+    ))
+    return await message.reply(text, reply_markup=button, disable_web_page_preview=True)
 
 
 @get_strings_dec('notes')
@@ -275,7 +276,7 @@ async def get_notes_list(message, strings, chat, keyword=None, pm=False):
             for note_name in note['names']:
                 if re.search(request, note_name):
                     notes.append(note)
-        if not len(notes) > 0:
+        if not notes:
             return await message.reply(strings['no_notes_pattern'] % request)
 
     # Search
@@ -407,9 +408,9 @@ async def note_info(message, chat, strings):
 
     text = strings['note_info_title']
 
-    note_names = ''
-    for note_name in note['names']:
-        note_names += f" <code>#{note_name}</code>"
+    note_names = ''.join(
+        f" <code>#{note_name}</code>" for note_name in note['names']
+    )
 
     text += strings['note_info_note'] % note_names
     text += strings['note_info_content'] % (
@@ -525,10 +526,7 @@ async def private_notes_cmd(message, chat, strings):
         await message.reply(strings['disabled_successfully'] % chat_name)
     else:
         # Assume admin asked for current state
-        if database:
-            state = strings['enabled']
-        else:
-            state = strings['disabled']
+        state = strings['enabled'] if database else strings['disabled']
         await message.reply(strings['current_state_info'].format(state=state, chat=chat_name))
 
 
@@ -575,10 +573,9 @@ async def private_notes_func(message, strings):
 
 
 async def __stats__():
-    text = "* <code>{}</code> total notes\n".format(
+    return "* <code>{}</code> total notes\n".format(
         await db.notes.count_documents({})
     )
-    return text
 
 
 async def __export__(chat_id):

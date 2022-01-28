@@ -111,7 +111,7 @@ async def help_cmd(message, strings):
 @register(helpmenu_cb.filter(), f='cb', allow_kwargs=True)
 async def helpmenu_callback(query, callback_data=None, **kwargs):
     mod = callback_data['mod']
-    if not mod in MOD_HELP:
+    if mod not in MOD_HELP:
         await query.answer()
         return
     msg = f"Help for <b>{mod}</b> module:\n"
