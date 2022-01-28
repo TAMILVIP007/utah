@@ -34,7 +34,7 @@ async def orangefox(message):
     except Exception:
         codename = ''
 
-    if codename == '':
+    if not codename:
         reply_text = "<b>OrangeFox Recovery is currently avaible for:</b>"
 
         devices = _send_request('device/releases/stable')
@@ -68,11 +68,7 @@ async def orangefox(message):
     reply_text += ("✅ <b>File MD5:</b> <code>{}</code>\n").format(
         release['md5'])
 
-    if device['maintained'] == 3:
-        status = "Not maintained"
-    else:
-        status = "Maintained"
-
+    status = "Not maintained" if device['maintained'] == 3 else "Maintained"
     reply_text += ("👨‍🔬 <b>Maintainer:</b> {name}, {status}\n").format(
         name=device['maintainer']['name'],
         status=status

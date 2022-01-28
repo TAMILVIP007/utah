@@ -37,8 +37,7 @@ async def whatis(message):
         await message.reply(m)
         return
 
-    data = GetDevice(device).get()
-    if data:
+    if data := GetDevice(device).get():
         name = data['name']
         device = data['device']
         brand = data['brand']
@@ -97,7 +96,7 @@ async def miui(message):
     yaml_data = load(get(MIUI_FIRM).content, Loader=Loader)
     data = [i for i in yaml_data if codename in i['codename']]
 
-    if len(data) < 1:
+    if not data:
         await message.reply("Provide a valid codename!")
         return
 
@@ -139,7 +138,7 @@ async def realmeui(message):
     yaml_data = load(get(REALME_FIRM).content, Loader=Loader)
     data = [i for i in yaml_data if codename in i['codename']]
 
-    if len(data) < 1:
+    if not data:
         await message.reply("Provide a valid codename!")
         return
 

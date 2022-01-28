@@ -54,7 +54,7 @@ else:
         old_ver = curr_ver
         while curr_ver < DB_STRUCTURE_VER:
             new_ver = curr_ver + 1
-            log.info(f"Trying update to {str(new_ver)}...")
+            log.info(f'Trying update to {new_ver}...')
 
             log.debug("Importing: texas.db." + str(new_ver))
             import_module("texas.db." + str(new_ver))
@@ -62,7 +62,7 @@ else:
             curr_ver += 1
             mongodb.db_structure.update_one({'db_ver': curr_ver - 1}, {"$set": {'db_ver': curr_ver}})
 
-        log.warn(f"Database update done to {str(curr_ver)} successfully!")
+        log.warn(f'Database update done to {curr_ver} successfully!')
         log.debug("Let's notify the bot owner")
         loop = asyncio.get_event_loop()
         bot_info = loop.run_until_complete(notify_bot_owner(old_ver, curr_ver))

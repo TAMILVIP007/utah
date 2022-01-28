@@ -131,10 +131,8 @@ async def mute_user_cmd(message, chat, user, args, strings):
         else:
             await message.reply(strings['enter_time'])
             return
-    else:
-        # Add reason
-        if args is not None and len(args := args.split()) > 0:
-            text += strings['reason'] % ' '.join(args[0:])
+    elif args is not None and len(args := args.split()) > 0:
+        text += strings['reason'] % ' '.join(args[:])
 
     # Check if silent
     silent = False
@@ -236,10 +234,8 @@ async def ban_user_cmd(message, chat, user, args, strings):
         else:
             await message.reply(strings['enter_time'])
             return
-    else:
-        # Add reason
-        if args is not None and len(args := args.split()) > 0:
-            text += strings['reason'] % ' '.join(args[0:])
+    elif args is not None and len(args := args.split()) > 0:
+        text += strings['reason'] % ' '.join(args[:])
 
     # Check if silent
     silent = False
@@ -296,7 +292,7 @@ async def unban_user_cmd(message, chat, user, strings):
 
 @register(f='leave')
 async def leave_silent(message):
-    if not message.from_user.id == BOT_ID:
+    if message.from_user.id != BOT_ID:
         return
 
     if redis.get('leave_silent:' + str(message.chat.id)) == message.left_chat_member.id:
